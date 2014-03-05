@@ -155,8 +155,8 @@ class Bot(asynchat.async_chat):
 
     def safe(self, string):
         """Remove newlines from a string."""
-        string = string.replace('\n', '')
-        string = string.replace('\r', '')
+        #string = string.replace('\n', '')
+        #string = string.replace('\r', '')
         if not isinstance(string, unicode):
             string = unicode(string, encoding='utf8')
         return string
@@ -174,11 +174,15 @@ class Bot(asynchat.async_chat):
         and ``willie.write(('PRIVMSG', ':Hello, world!'))`` will send
         ``PRIVMSG :Hello, world!`` to the server.
 
+        NOT ANYMORE, STRING SPLITTED AND ADDED PREFIX (args) TO ALL
         Newlines and carriage returns ('\\n' and '\\r') are removed before
-        sending. Additionally, if the message (after joining) is longer than
+        sending. 
+
+        Additionally, if the message (after joining) is longer than
         than 510 characters, any remaining characters will not be sent.
 
         """
+
         args = [self.safe(arg) for arg in args]
         if text is not None:
             text = self.safe(text)
@@ -199,11 +203,17 @@ class Bot(asynchat.async_chat):
             #provision for continuation of message lines.
 
             if text is not None:
-                temp = (u' '.join(args) + ' :' + text)[:510] + '\r\n'
+                tempList = text.split('\r\n')
+                res = ''
+                for temp in tempList:
+                    res += (' '.join(args) + ' :' + temp)[:510] + '\r\n'
+                self.log_raw(res, '>>')
             else:
-                temp = u' '.join(args)[:510] + '\r\n'
-            self.log_raw(temp, '>>')
-            self.send(temp.encode('utf-8'))
+                res = ' '.join(args)[:510] + '\r\n'
+
+            self.log_raw(res, '>>')
+
+            self.send(res.encode('utf-8'))
         finally:
             self.writing_lock.release()
 
@@ -231,7 +241,7 @@ class Bot(asynchat.async_chat):
             asyncore.loop()
         except KeyboardInterrupt:
             print('KeyboardInterrupt')
-            self.quit('KeyboardInterrupt')
+            self.quit('')
 
     def quit(self, message):
         """Disconnect from IRC and close the bot."""
@@ -392,7 +402,7 @@ class Bot(asynchat.async_chat):
         line = self.buffer
         if line.endswith('\r'):
             line = line[:-1]
-        self.buffer = u''
+        self.buffer = ''
         self.raw = line
 
         # Break off IRCv3 message tags, if present
@@ -468,11 +478,12 @@ class Bot(asynchat.async_chat):
                         time.sleep(wait - elapsed)
 
             # Loop detection
-            messages = [m[1] for m in self.stack[-8:]]
-            if messages.count(text) >= 5:
-                text = '...'
-                if messages.count('...') >= 3:
-                    return
+            #messages = [m[1] for m in self.stack[-8:]]
+            #if messages.count(text) >= 5:
+            #    text = '...'
+            #    if messages.count('...') >= 3:
+            #        
+            #        return
 
             self.write(('PRIVMSG', recipient), text)
             self.stack.append((time.time(), self.safe(text)))
@@ -518,16 +529,16 @@ class Bot(asynchat.async_chat):
                 with codecs.open(
                     log_filename, 'a', encoding='utf-8'
                 ) as logfile:
-                    logfile.write(u'Signature: %s\n' % signature)
+                    logfile.write('Signature: %s\n' % signature)
                     if origin:
                         logfile.write(
-                            u'from %s at %s:\n' % (
+                            'from %s at %s:\n' % (
                                 origin.sender, str(datetime.now())
                             )
                         )
                     if trigger:
                         logfile.write(
-                            u'Message was: <%s> %s\n' % (
+                            'Message was: <%s> %s\n' % (
                                 trigger.nick, trigger.group(0)
                             )
                         )
@@ -541,7 +552,9 @@ class Bot(asynchat.async_chat):
                            "), can't save traceback: " + str(e), 'always')
 
             if origin:
-                self.msg(origin.sender, signature)
+                #self.msg(origin.sender, signature)
+                # Don't send the file name 
+                self.msg(origin.sender, report[0])
         except Exception as e:
             if origin:
                 self.msg(origin.sender, "Got an error.")

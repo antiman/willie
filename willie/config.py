@@ -216,7 +216,7 @@ class Config(object):
                 value = getpass.getpass(prompt + ' [%s]: ' % atr) or atr
                 self.parser.set(section, option, value)
             else:
-                value = raw_input(prompt + ' [%s]: ' % atr) or atr
+                value = input(prompt + ' [%s]: ' % atr) or atr
                 self.parser.set(section, option, value)
         elif default:
             if ispass:
@@ -225,7 +225,7 @@ class Config(object):
                 ) or default
                 self.parser.set(section, option, value)
             else:
-                value = raw_input(prompt + ' [%s]: ' % default) or default
+                value = input(prompt + ' [%s]: ' % default) or default
                 self.parser.set(section, option, value)
         else:
             value = ''
@@ -233,7 +233,7 @@ class Config(object):
                 if ispass:
                     value = getpass.getpass(prompt + ': ')
                 else:
-                    value = raw_input(prompt + ': ')
+                    value = input(prompt + ': ')
             self.parser.set(section, option, value)
 
     def add_list(self, section, option, message, prompt):
@@ -252,10 +252,10 @@ class Config(object):
             m = "You currently have " + self.parser.get(section, option)
             if self.option(m + '. Would you like to keep them', True):
                 lst = self.parser.get(section, option).split(',')
-        mem = raw_input(prompt + ' ')
+        mem = input(prompt + ' ')
         while mem:
             lst.append(mem)
-            mem = raw_input(prompt + ' ')
+            mem = input(prompt + ' ')
         self.parser.set(section, option, ','.join(lst))
 
     def add_option(self, section, option, question, default=False):
@@ -288,7 +288,7 @@ class Config(object):
         d = 'n'
         if default:
             d = 'y'
-        ans = raw_input(question + ' (y/n)? [' + d + '] ')
+        ans = input(question + ' (y/n)? [' + d + '] ')
         if not ans:
             ans = d
         return ans.lower() == 'y'
@@ -365,6 +365,9 @@ class Config(object):
         else:
             home_modules_dir = os.path.join(os.path.expanduser('~'), '.willie',
                                         'modules')
+        # Add home_modules_dir to sys.path
+        sys.path.append(home_modules_dir)
+        
         if not os.path.isdir(home_modules_dir):
             os.makedirs(home_modules_dir)
         for fn in os.listdir(home_modules_dir):

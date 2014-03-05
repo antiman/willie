@@ -23,7 +23,7 @@ def movie(bot, trigger):
     word = word.replace(" ", "+")
     uri = "http://www.imdbapi.com/?t=" + word
     u = web.get_urllib_object(uri, 30)
-    data = json.load(u)  # data is a Dict containing all the information we need
+    data = json.loads(u.read().decode('utf8'))  # data is a Dict containing all the information we need
     u.close()
     if data['Response'] == 'False':
         if 'Error' in data:

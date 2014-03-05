@@ -157,6 +157,8 @@ def handle_names(bot, trigger):
 def track_modes(bot, trigger):
     """Track usermode changes and keep our lists of ops up to date."""
     line = trigger.args
+    #Pop last empty element
+    line.pop()
 
     # If the first character of where the mode is being set isn't a #
     # then it's a user mode, not a channel mode, so we'll ignore it.
@@ -207,26 +209,13 @@ def track_modes(bot, trigger):
     for nick, mode in zip(nicks, modes):
         priv = bot.privileges[channel].get(nick) or 0
         value = mapping.get(mode[1])
-        if value is not None:
-            priv = priv | value
-            bot.privileges[channel][nick] = priv
 
-        #Old mode maintenance
-        if mode[1] == 'o' or mode[1] == 'q' or mode[1] == 'a':
-            if mode[0] == '+':
-                bot.add_op(channel, nick)
-            else:
-                bot.del_op(channel, nick)
-        elif mode[1] == 'h':  # Halfop
-            if mode[0] == '+':
-                bot.add_halfop(channel, nick)
-            else:
-                bot.del_halfop(channel, nick)
-        elif mode[1] == 'v':
-            if mode[0] == '+':
-                bot.add_voice(channel, nick)
-            else:
-                bot.del_voice(channel, nick)
+        if value is not None:
+            priv = value
+            if mode[0] == '-':
+                priv = 0
+            bot.privileges[channel][nick] = priv
+        return
 
 
 @willie.module.rule('.*')
@@ -236,6 +225,7 @@ def track_nicks(bot, trigger):
     """Track nickname changes and maintain our chanops list accordingly."""
     old = trigger.nick
     new = Nick(trigger)
+
 
     # Give debug mssage, and PM the owner, if the bot's own nick changes.
     if old == bot.nick:
@@ -259,20 +249,6 @@ def track_nicks(bot, trigger):
         if old in bot.privileges[channel]:
             value = bot.privileges[channel].pop(old)
             bot.privileges[channel][new] = value
-
-    # Old privilege maintenance
-    for channel in bot.halfplus:
-        if old in bot.halfplus[channel]:
-            bot.del_halfop(channel, old)
-            bot.add_halfop(channel, new)
-    for channel in bot.ops:
-        if old in bot.ops[channel]:
-            bot.del_op(channel, old)
-            bot.add_op(channel, new)
-    for channel in bot.voices:
-        if old in bot.voices[channel]:
-            bot.del_voice(channel, old)
-            bot.add_voice(channel, new)
 
 
 @willie.module.rule('(.*)')

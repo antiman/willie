@@ -43,16 +43,23 @@ def f_reload(bot, trigger):
         if bot.is_callable(obj) or bot.is_shutdown(obj):
             old_callables[obj_name] = obj
 
+    # Call the shutdown method of the module
+    if hasattr(old_module, "shutdown"):
+        old_module.shutdown(bot)
+
     bot.unregister(old_callables)
     # Also remove all references to willie callables from top level of the
     # module, so that they will not get loaded again if reloading the
     # module does not override them.
+
     for obj_name in old_callables.keys():
         delattr(old_module, obj_name)
 
-    # Also delete the setup function
+    # Also delete the setup and shutdown function
     if hasattr(old_module, "setup"):
         delattr(old_module, "setup")
+    if hasattr(old_module, "shutdown"):
+        delattr(old_module, "shutdown")
 
     # Thanks to moot for prodding me on this
     path = old_module.__file__
