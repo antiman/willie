@@ -10,7 +10,7 @@ import sys
 import os.path
 import time
 import imp
-from willie.tools import iteritems
+from willie.tools import iteritems,stderr
 import willie.module
 import subprocess
 
@@ -28,10 +28,15 @@ def f_reload(bot, trigger):
         return bot.reply('What?')
 
     if (not name) or (name == '*') or (name.upper() == 'ALL THE THINGS'):
+        # Calling the shutdown methods of the modules
+        for moduleName in bot.config.enumerate_modules():
+            module = sys.modules[moduleName]
+            if hasattr(module, "shutdown"):
+                module.shutdown(bot)
         bot.callables = None
         bot.commands = None
         bot.setup()
-        return bot.reply('done')
+        return bot.reply('done reloading')
 
     if not name in sys.modules:
         return bot.reply('%s: no such module!' % name)

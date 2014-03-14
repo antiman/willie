@@ -29,12 +29,17 @@ def help(bot, trigger):
                 bot.say('e.g. ' + bot.doc[name][1])
 
 
-@commands('commands')
+@commands('commands','komennot')
 @priority('low')
 def commands(bot, trigger):
     """Return a list of bot's commands"""
-    names = ', '.join(sorted(iterkeys(bot.doc)))
-    bot.say('Commands: ' + names + '.')
+    banned = ['blocks', 'join', 'tell', 'load', 'mangle', 'me', 'mode', 'msg', 'part', 'quit', 'reload', 'save', 'set', 'update']
+    list = sorted(iterkeys(bot.doc))
+    names = ''
+    for name in list:
+        if name not in banned:
+            names += name + ', '
+    bot.say('Commands: ' + names[:-2] + '.')
 
 
 @rule('$nick' r'(?i)help(?:[?!]+)?$')
