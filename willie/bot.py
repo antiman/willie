@@ -889,6 +889,11 @@ class Willie(irc.Bot):
             'Calling shutdown for %d modules.' % (len(self.shutdown_methods),)
         )
 
+        for moduleName in self.config.enumerate_modules():
+            module = sys.modules[moduleName]
+            if hasattr(module, "shutdown"):
+                module.shutdown(self)
+
         hostmask = "%s!%s@%s" % (self.nick, self.user, socket.gethostname())
         willie = self.WillieWrapper(self, irc.Origin(self, hostmask, [], {}))
         for shutdown_method in self.shutdown_methods:

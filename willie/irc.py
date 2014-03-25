@@ -99,6 +99,7 @@ class Bot(asynchat.async_chat):
         self.stack = []
         self.ca_certs = ca_certs
         self.hasquit = False
+        self.timed_out = False
 
         self.sending = threading.RLock()
         self.writing_lock = threading.Lock()
@@ -325,18 +326,17 @@ class Bot(asynchat.async_chat):
             if (
                 datetime.now() - self.last_ping_time
             ).seconds > int(self.config.timeout):
-                stderr(
-                    'Ping timeout reached after %s seconds,' +
-                    ' closing connection' %
-                    self.config.timeout
-                )
+                stderr('Ping timeout reached after %s seconds, closing connection' % self.config.timeout)
                 self.handle_close()
+                self.timed_out = True
                 break
             else:
                 time.sleep(int(self.config.timeout))
 
     def _send_ping(self):
         while True:
+            if self.timed_out:
+                break
             if (
                 datetime.now() - self.last_ping_time
             ).seconds > int(self.config.timeout) / 2:

@@ -28,8 +28,10 @@ __version__ = '4.1.0-git'
 def run(config):
     if config.core.delay is not None:
         delay = config.core.delay
+    elif config.core.timeout is not None:
+        delay = 2 * int(config.core.timeout)
     else:
-        delay = 20
+        delay = 300
     # Inject ca_certs from config to web for SSL validation of web requests
     if hasattr(config, 'ca_certs') and config.ca_certs is not None:
         web.ca_certs  = config.ca_certs
