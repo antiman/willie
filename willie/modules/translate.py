@@ -110,9 +110,9 @@ def tr(bot, trigger):
 
 @commands('translate', 'tr')
 @example('.tr :en :fr my dog', '"mon chien" (en to fr, translate.google.com)')
-@example('.tr mon chien', '"my dog" (fr to en, translate.google.com)')
+@example('!tr :en :fi dog', '"koira" (en to fi, translate.google.com)')
 def tr2(bot, trigger):
-    """Translates a phrase, with an optional language hint."""
+    """Translates a phrase, with an optional language hint"""
     command = trigger.group(2)
 
     def langcode(p):

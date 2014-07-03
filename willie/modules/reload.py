@@ -21,6 +21,7 @@ import subprocess
 def f_reload(bot, trigger):
     """Reloads a module, for use by admins only."""
     if not trigger.admin:
+        stderr('joku prkl yritti reloadata')
         return
 
     name = trigger.group(2)

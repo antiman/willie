@@ -203,18 +203,33 @@ class Bot(asynchat.async_chat):
             #maximum allowed for the command and its parameters.  There is no
             #provision for continuation of message lines.
 
+            resLines = []
+            maxwidth = 455
             if text is not None:
-                tempList = text.split('\r\n')
+                preLine = ' '.join(args)
+                lines = text.split('\r\n')
+                tempList = []
+                for line in lines:
+                    while len(line) > maxwidth - 2 - len(preLine):
+                        width = maxwidth - 2 - len(preLine)
+                        tempList.append(line[:width])
+                        line = line[width:]
+                    width = 1000
+                    tempList.append(line[:width])
+                lines = tempList
                 res = ''
-                for temp in tempList:
-                    res += (' '.join(args) + ' :' + temp)[:510] + '\r\n'
-                self.log_raw(res, '>>')
+                for temp in lines:
+                    if len(res) + len(preLine) + len(temp) + 2 > maxwidth:
+                        resLines.append(res)
+                        res = ''
+                    res += preLine + ' :' + temp + '\r\n'
+                resLines.append(res)
             else:
-                res = ' '.join(args)[:510] + '\r\n'
+                resLines.append(' '.join(args)[:maxwidth] + '\r\n')
 
-            self.log_raw(res, '>>')
-
-            self.send(res.encode('utf-8'))
+            for line in resLines:
+                self.log_raw(line, '>>')
+                self.send(line.encode('utf-8'))
         finally:
             self.writing_lock.release()
 
