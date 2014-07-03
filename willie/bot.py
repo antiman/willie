@@ -727,6 +727,16 @@ class Willie(irc.Bot):
         if nick not in self.times:
             self.times[nick] = dict()
 
+        if trigger.event == 'PRIVMSG' and not ( trigger.admin or self.nick == nick or self.config.core.host == nick) and not trigger.sender.startswith('#'):
+            self.debug(
+                __file__,
+                "%s yritti privaan %s in %s" % (
+                    trigger.nick, func.__name__, trigger.sender
+                ),
+                "verbose"
+            )
+            return
+
         if not trigger.admin and \
                 not func.unblockable and \
                 func in self.times[nick]:
